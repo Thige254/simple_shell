@@ -31,6 +31,62 @@ char *read_command(void)
 }
 
 /**
+ * shell_loop - main loop. Its where commands are read and executed.
+ */
+void shell_loop(void)
+{
+	char *line;
+	char *cmd_path;
+	pid_t pid;
+	int status;
+
+	do {
+		write(STDOUT_FILENO, "> ", 2);
+		line = read_command();
+		line[strcspn(line, "\n")] = 0; /* Strip the newline char */
+
+		pid = fork();
+
+if (pid == 0)
+{
+	/* Child process */
+	char *argv[2];
+
+	cmd_path = get_cmd_path(line);
+	if (cmd_path == NULL)
+	{
+		write(STDERR_FILENO, line, strlen(line));
+		write(STDERR_FILENO, ": not found\n", 12);
+		exit(EXIT_FAILURE);
+	}
+	argv[0] = cmd_path;
+	argv[1] = NULL;
+	if (execve(cmd_path, argv, environ) == -1)
+	{
+		write(STDERR_FILENO, line, strlen(line));
+		write(STDERR_FILENO, ": not found\n", 12);
+		exit(EXIT_FAILURE);
+	}
+}
+
+		else if (pid < 0)
+		{
+			/* Error forking */
+			perror("hsh");
+		}
+		else
+		{
+			/* Parent process */
+			do {
+				waitpid(pid, &status, WUNTRACED);
+			} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+		}
+
+		free(line);
+	} while (1);
+}
+
+/**
  * get_cmd_path - Finds the full path of a command.
  * @cmd: The name of the command.
  *
