@@ -7,11 +7,11 @@
 
 /**
  * main - Main entry point for the shell.
- * Return: (EXIT_SUCCESS) or exit status
+ * Return: 0 (EXIT_SUCCESS)
  */
 
 int main(void)
 {
 	shell_loop();
-	return (0);
+	return (EXIT_SUCCESS);
 }
