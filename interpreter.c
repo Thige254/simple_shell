@@ -111,8 +111,16 @@ int create_child(char *command)
 int exec_cmd(char *line)
 {
 	char *command;
+	struct stat buf;
 
-	command = get_cmd_path(line);
+	if (stat(line, &buf) == 0)
+	{
+		command = strdup(line);
+	}
+	else
+	{
+		command = get_cmd_path(line);
+	}
 
 	if (command == NULL)
 	{
