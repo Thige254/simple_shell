@@ -63,57 +63,84 @@ char *get_cmd_path(char *cmd)
 }
 
 /**
+ * create_child - Creates a child process to execute the command.
+ * @command: The command to execute.
+ *
+ * Return: The status of the child process.
+ */
+int create_child(char *command)
+{
+	pid_t child_pid;
+	int status;
+	char *argv[2];
+
+	argv[0] = command;
+	argv[1] = NULL;
+
+	child_pid = fork();
+	if (child_pid == -1)
+	{
+		perror("Error:");
+		return (1);
+	}
+
+	if (child_pid == 0)
+	{
+		/* Child process */
+		if (execve(command, argv, NULL) == -1)
+		{
+			perror("Error:");
+		}
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		/* Parent process */
+		wait(&status);
+	}
+
+	return (1);
+}
+
+/**
+ * exec_cmd - Execute command
+ * @line: The command line
+ *
+ * Return: Always 1 (Success)
+ */
+int exec_cmd(char *line)
+{
+	char *command;
+
+	command = get_cmd_path(line);
+
+	if (command == NULL)
+	{
+		fprintf(stderr, "%s: command not found\n", line);
+		free(line);
+		return (1);
+	}
+
+	create_child(command);
+
+	free(line);
+	free(command);
+
+	return (1);
+}
+
+/**
  * shell_loop - Main loop for the shell
  *
  */
 void shell_loop(void)
 {
 	char *line;
-	char *command;
-	pid_t child_pid;
-	int status;
 
 	while (1)
 	{
 		printf("$ ");
 		line = read_command();
-		command = get_cmd_path(line);
-
-		if (command == NULL)
-		{
-			fprintf(stderr, "%s: command not found\n", line);
-			free(line);
-			continue;
-		}
-
-		child_pid = fork();
-		if (child_pid == -1)
-		{
-			perror("Error:");
-			free(line);
-			free(command);
-			continue;
-		}
-
-		if (child_pid == 0)
-		{
-			/* Child process */
-			char *argv[2];
-			argv[0] = command;
-			argv[1] = NULL;
-			if (execve(command, argv, NULL) == -1)
-			{
-				perror("Error:");
-			}
-			exit(EXIT_FAILURE);
-		}
-		else
-		{
-			/* Parent process */
-			wait(&status);
-		}
-
-		free(line);
-		free(command);
+		exec_cmd(line);
 	}
 }
