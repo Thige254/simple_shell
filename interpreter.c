@@ -1,10 +1,18 @@
 #include "shell.h"
 
 /**
- * read_command - Read a command from stdin.
- *
- * Return: A pointer to the command read.
- */
+* prompt_user - prints "$ " to the standard output
+*/
+void prompt_user(void)
+{
+	if (isatty(STDIN_FILENO))
+		write(STDERR_FILENO, "$ ", 2);
+}
+
+/**
+* read_command - reads a command from the standard input
+* Return: the read command as a string
+*/
 char *read_command(void)
 {
 	char *line = NULL;
@@ -23,18 +31,14 @@ char *read_command(void)
 			exit(EXIT_FAILURE);
 		}
 	}
-	/* Replace newline with null character */
-	line[strlen(line) - 1] = '\0';
 	return (line);
 }
 
 /**
- * get_cmd_path - Finds the full path of a command.
- * @cmd: The name of the command.
- *
- * Return: The full path of the command,
- * NULL if the command not found.
- */
+* get_cmd_path - finds the absolute path of a command
+* @cmd: command to find the path for
+* Return: absolute path of the command
+*/
 char *get_cmd_path(char *cmd)
 {
 	char *path = getenv("PATH");
@@ -63,92 +67,69 @@ char *get_cmd_path(char *cmd)
 }
 
 /**
- * create_child - Creates a child process to execute the command.
- * @command: The command to execute.
- *
- * Return: The status of the child process.
- */
-int create_child(char *command)
+* exec_cmd - executes the command in a child process
+* @command: command to execute
+* @cmd_path: path of the command
+*/
+void exec_cmd(char *command, char *cmd_path)
 {
+	char *argv[2];
 	pid_t child_pid;
 	int status;
-	char *argv[2];
-
-	argv[0] = command;
-	argv[1] = NULL;
 
 	child_pid = fork();
 	if (child_pid == -1)
 	{
-		perror("Error:");
-		return (1);
+		perror("Error");
+		free(cmd_path);
+		exit(1);
 	}
-
 	if (child_pid == 0)
 	{
-		/* Child process */
-		if (execve(command, argv, NULL) == -1)
+		argv[0] = command;
+		argv[1] = NULL;
+		if (execve(cmd_path, argv, NULL) == -1)
 		{
-			perror("Error:");
+			perror("Error");
 		}
-		exit(EXIT_FAILURE);
 	}
 	else
 	{
-		/* Parent process */
 		wait(&status);
 	}
-
-	return (1);
 }
 
 /**
- * exec_cmd - Execute command
- * @line: The command line
- *
- * Return: Always 1 (Success)
- */
-int exec_cmd(char *line)
-{
-	char *command;
-	struct stat buf;
-
-	if (stat(line, &buf) == 0)
-	{
-		command = strdup(line);
-	}
-	else
-	{
-		command = get_cmd_path(line);
-	}
-
-	if (command == NULL)
-	{
-		fprintf(stderr, "%s: command not found\n", line);
-		free(line);
-		return (1);
-	}
-
-	create_child(command);
-
-	free(line);
-	free(command);
-
-	return (1);
-}
-
-/**
- * shell_loop - Main loop for the shell
- *
- */
+* shell_loop - main loop of the shell
+* It reads a command, tries to find the binary for the command
+* and then forks a child process to execute the command
+*/
 void shell_loop(void)
 {
 	char *line;
+	char *command;
+	char *cmd_path;
 
 	while (1)
 	{
-		printf("$ ");
+		prompt_user();
 		line = read_command();
-		exec_cmd(line);
+		if (strcmp(line, "\n") == 0)
+		{
+			free(line);
+			continue;
+		}
+		command = strtok(line, "\n");
+		cmd_path = get_cmd_path(command);
+		if (cmd_path == NULL)
+		{
+			write(STDERR_FILENO, command, strlen(command));
+			write(STDERR_FILENO, ": command not found\n", 20);
+			free(line);
+			continue;
+		}
+		exec_cmd(command, cmd_path);
+		free(line);
+		free(cmd_path);
 	}
 }
