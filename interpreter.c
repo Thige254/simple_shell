@@ -1,132 +1,120 @@
 #include "shell.h"
 
-int cd_builtin(char **args, char **front);
-int exit_builtin(char **args, char **front);
-int env_builtin(char **args, char **front);
-int setenv_builtin(char **args, char **front);
-int unsetenv_builtin(char **args, char **front);
-
-builtin_t builtins[] = {
-	{"cd", cd_builtin},
-	{"exit", exit_builtin},
-	{"env", env_builtin},
-	{"setenv", setenv_builtin},
-	{"unsetenv", unsetenv_builtin},
-	{NULL, NULL}
-};
-
 /**
- * get_builtin - Retrieves a built-in function.
- * @s: The name of the built-in function to find.
+ * read_command - Read a command from stdin.
  *
- * Return: If s does not match a built-in - NULL.
- *         Otherwise - a pointer to the function.
+ * Return: A pointer to the command read.
  */
-int (*get_builtin(char *s))(char **args, char **front)
+char *read_command(void)
 {
-	int index;
+    char *line = NULL;
+    size_t bufsize = 0;
 
-	for (index = 0; builtins[index].name != NULL; index++)
-	{
-		if (_strcmp(s, builtins[index].name) == 0)
-			return (builtins[index].func);
-	}
-
-	return (NULL);
+    if (getline(&line, &bufsize, stdin) == -1)
+    {
+        if (feof(stdin))
+        {
+            write(STDOUT_FILENO, "\n", 1);
+            exit(EXIT_SUCCESS);
+        }
+        else
+        {
+            perror("readline");
+            exit(EXIT_FAILURE);
+        }
+    }
+    /* Replace newline with null character */
+    line[strlen(line) - 1] = '\0';
+    return (line);
 }
 
 /**
- * cd_builtin - Changes the current directory.
- * @args: An array of arguments.
- * @front: A double pointer to the beginning of args.
+ * get_cmd_path - Finds the full path of a command.
+ * @cmd: The name of the command.
  *
- * Return: 0 if successful, 2 if it fails.
+ * Return: The full path of the command,
+ * NULL if the command not found.
  */
-int cd_builtin(char **args, char **front)
+char *get_cmd_path(char *cmd)
 {
-	(void)front;
+    char *path = getenv("PATH");
+    char *path_copy = strdup(path);
+    char *token = strtok(path_copy, ":");
+    char *cmd_path = malloc(strlen(cmd) + strlen(path) + 2);
+    struct stat buf;
 
-	if (args[0] == NULL)
-	{
-		chdir(getenv("HOME"));
-		return (0);
-	}
-	else if (chdir(args[0]) != 0)
-	{
-		perror("hsh");
-		return (2);
-	}
+    while (token != NULL)
+    {
+        strcpy(cmd_path, token);
+        strcat(cmd_path, "/");
+        strcat(cmd_path, cmd);
 
-	return (0);
+        if (stat(cmd_path, &buf) == 0)
+        {
+            free(path_copy);
+            return (cmd_path);
+        }
+        token = strtok(NULL, ":");
+    }
+
+    free(cmd_path);
+    free(path_copy);
+    return (NULL);
 }
 
 /**
- * exit_builtin - Exits the shell.
- * @args: An array of arguments.
- * @front: A double pointer to the beginning of args.
+ * shell_loop - Main loop for the shell
  *
- * Return: The status to exit the shell with.
  */
-int exit_builtin(char **args, char **front)
+void shell_loop(void)
 {
-	(void)args;
-	(void)front;
+    char *line;
+    char *command;
+    pid_t child_pid;
+    int status;
 
-	return (-EXIT);
-}
+    while (1)
+    {
+        printf("$ ");
+        line = read_command();
+        command = get_cmd_path(line);
 
-/**
- * env_builtin - Prints the current environment.
- * @args: An array of arguments.
- * @front: A double pointer to the beginning of args.
- *
- * Return: 0.
- */
-int env_builtin(char **args, char **front)
-{
-	print_env();
+        if (command == NULL)
+        {
+            fprintf(stderr, "%s: command not found\n", line);
+            free(line);
+            continue;
+        }
 
-	return (0);
-}
+        child_pid = fork();
+        if (child_pid == -1)
+        {
+            perror("Error:");
+            free(line);
+            free(command);
+            continue;
+        }
 
-/**
- * setenv_builtin - Sets an environment variable.
- * @args: An array of arguments.
- * @front: A double pointer to the beginning of args.
- *
- * Return: 0 if successful, 2 if it fails.
- */
-int setenv_builtin(char **args, char **front)
-{
-	if (args[0] == NULL || args[1] == NULL)
-	{
-		perror("hsh");
-		return (2);
-	}
-	else
-	{
-		_setenv(args[0], args[1], 1);
-		return (0);
-	}
-}
+        if (child_pid == 0)
+        {
+            /* Child process */
+            char *argv[2];
+			argv[0] = command;
+			argv[1] = NULL;
 
-/**
- * unsetenv_builtin - Unsets an environment variable.
- * @args: An array of arguments.
- * @front: A double pointer to the beginning of args.
- *
- * Return: 0 if successful, 2 if it fails.
- */
-int unsetenv_builtin(char **args, char **front)
-{
-	if (args[0] == NULL)
-	{
-		perror("hsh");
-		return (2);
-	}
-	else
-	{
-		_unsetenv(args[0]);
-		return (0);
-	}
+            if (execve(command, argv, NULL) == -1)
+            {
+                perror("Error:");
+            }
+            exit(EXIT_FAILURE);
+        }
+        else
+        {
+            /* Parent process */
+            wait(&status);
+        }
+
+        free(line);
+        free(command);
+    }
 }
