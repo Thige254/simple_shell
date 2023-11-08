@@ -58,6 +58,8 @@ int exec_command(char *cmd)
 {
 	pid_t child_pid;
 	int status;
+	char *token;
+	int arg_index;
 
 	child_pid = fork();
 	if (child_pid == -1)
@@ -68,11 +70,21 @@ int exec_command(char *cmd)
 
 	if (child_pid == 0)
 	{
-		char *cmd_args[4];
+		char *cmd_args[64];
 		cmd_args[0] = "/bin/sh";
 		cmd_args[1] = "-c";
-		cmd_args[2] = cmd;
-		cmd_args[3] = NULL;
+
+		arg_index = 2;
+
+		token = strtok(cmd, " ");
+		while (token != NULL)
+		{
+			cmd_args[arg_index] = token;
+			token = strtok(NULL, " ");
+			arg_index++;
+		}
+
+		cmd_args[arg_index] = NULL;
 
 		/* Execute the command using /bin/sh -c */
 		execve("/bin/sh", cmd_args, NULL);
