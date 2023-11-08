@@ -48,7 +48,6 @@ void run_shell(void)
 }
 
 /* Function to execute a command in a child process */
-/* Function to execute a command in a child process */
 /**
  * exec_command - Execute a command in a child process
  * @cmd: The command to execute
@@ -69,12 +68,13 @@ int exec_command(char *cmd)
 
 	if (child_pid == 0)
 	{
-		char *cmd_args[2];
-		cmd_args[0] = cmd;
-		cmd_args[1] = NULL;
+		char *cmd_args[3];
+		cmd_args[0] = "/bin/sh";
+		cmd_args[1] = "-c";
+		cmd_args[2] = cmd;
 
-		/* Execute the command */
-		execve(cmd, cmd_args, NULL);
+		/* Execute the command using /bin/sh */
+		execve("/bin/sh", cmd_args, NULL);
 
 		/* Handle execve failure */
 		fprintf(stderr, "execve failed: %s\n", strerror(errno));
