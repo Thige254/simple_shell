@@ -5,13 +5,13 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 #define BUFFER_SIZE 1024
 
 /* Function to execute a command in a child process */
 int exec_command(char *cmd);
 
-/* Function to run the simple shell */
 /* Function to run the simple shell */
 /**
  * run_shell - Run the simple shell
@@ -31,7 +31,7 @@ void run_shell(void)
 		{
 			if (isatty(STDIN_FILENO))
 				putchar('\n');
-			free(input); /* Free memory in both success and error cases*/
+			free(input);
 			exit(EXIT_SUCCESS);
 		}
 
@@ -41,13 +41,13 @@ void run_shell(void)
 
 		/* Execute commands or handle errors */
 		if (exec_command(input) == -1)
-		/*  Print a specific error message*/
 			fprintf(stderr, "Error: Command not found\n");
 
-		free(input); /* Free memory in both success and error cases*/
+		free(input);
 	}
 }
 
+/* Function to execute a command in a child process */
 /* Function to execute a command in a child process */
 /**
  * exec_command - Execute a command in a child process
@@ -66,17 +66,19 @@ int exec_command(char *cmd)
 		perror("Fork failed");
 		return (-1);
 	}
+
 	if (child_pid == 0)
 	{
 		char *cmd_args[2];
 		cmd_args[0] = cmd;
 		cmd_args[1] = NULL;
 
-		if (execve(cmd, cmd_args, NULL) == -1)
-		{
-			perror("execve failed");
-			exit(EXIT_FAILURE); /* Exit the child process with failure status*/
-		}
+		/* Execute the command */
+		execve(cmd, cmd_args, NULL);
+
+		/* Handle execve failure */
+		fprintf(stderr, "execve failed: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
 	}
 	else
 	{
