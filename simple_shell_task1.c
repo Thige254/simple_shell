@@ -2,8 +2,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define BUFFER_SIZE 1024
+
+/* Function to execute a command in a child process */
+int exec_command(char *cmd);
+
+/* Function to run the simple shell */
+/* Function to run the simple shell */
 /**
  * run_shell - Run the simple shell
  *
@@ -22,7 +31,7 @@ void run_shell(void)
 		{
 			if (isatty(STDIN_FILENO))
 				putchar('\n');
-			free(input);
+			free(input); /* Free memory in both success and error cases*/
 			exit(EXIT_SUCCESS);
 		}
 
@@ -32,18 +41,20 @@ void run_shell(void)
 
 		/* Execute commands or handle errors */
 		if (exec_command(input) == -1)
-			perror("Error");
+		/*  Print a specific error message*/
+			fprintf(stderr, "Error: Command not found\n");
 
-		free(input);
+		free(input); /* Free memory in both success and error cases*/
 	}
 }
+
+/* Function to execute a command in a child process */
 /**
  * exec_command - Execute a command in a child process
  * @cmd: The command to execute
  *
  * Return: 0 on success, -1 on failure
  */
-
 int exec_command(char *cmd)
 {
 	pid_t child_pid;
@@ -57,26 +68,20 @@ int exec_command(char *cmd)
 	}
 	if (child_pid == 0)
 	{
-		if (execve(cmd, (char *const[])
-		{cmd, NULL}, NULL) == -1)
+		char *cmd_args[2];
+		cmd_args[0] = cmd;
+		cmd_args[1] = NULL;
+
+		if (execve(cmd, cmd_args, NULL) == -1)
 		{
-			return (-1);
+			perror("execve failed");
+			exit(EXIT_FAILURE); /* Exit the child process with failure status*/
 		}
 	}
 	else
 	{
 		wait(&status);
 	}
-	return (0);
-}
-/**
- * main - Entry point for the simple shell
- *
- * Return: Always returns 0
- */
 
-int main(void)
-{
-	run_shell();
 	return (0);
 }

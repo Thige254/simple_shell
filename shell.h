@@ -2,7 +2,6 @@
 #define SHELL_H
 
 #include <stdio.h>
-#include <stdlib.h>
 
 /* Function to execute the shell */
 void run_shell(void);
