@@ -3,38 +3,35 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <errno>
+#include <errno.h>
 
-
-/**
- * find_executable - find the executables of arguments.
- * @command: The user command string.
- * Return: Return NULL if the executable is not found.
- */
 char *find_executable(char *command)
 {
 	char *path = getenv("PATH");
+	char *path_copy;
+	char *token;
+	char *full_path;
+
 	if (path == NULL)
 	{
 		return (NULL);
 	}
 
-	char *path_copy = strdup(path);
+	path_copy = strdup(path);
 	if (path_copy == NULL)
 	{
 		perror("strdup");
 		return (NULL);
 	}
 
-	char *token = strtok(path_copy, ":");
+	token = strtok(path_copy, ":");
 	while (token != NULL)
 	{
-		/* Check if the executable exists in this directory */
-		char *full_path = malloc(strlen(token) + strlen(command) + 2);
-		/*+2 for '/' and null terminator */
+		full_path = malloc(strlen(token) + strlen(command) + 2);
 		if (full_path == NULL)
 		{
 			perror("malloc");
+			free(path_copy);
 			return (NULL);
 		}
 		sprintf(full_path, "%s/%s", token, command);
@@ -50,5 +47,5 @@ char *find_executable(char *command)
 	}
 
 	free(path_copy);
-	return (NULL); /* Return NULL if the executable is not found */
+	return (NULL);
 }

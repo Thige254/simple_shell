@@ -18,7 +18,6 @@ char **tokenize_input(char *input)
 		if (!tokens)
 		{
 			perror("Malloc error");
-			exit(EXIT_FAILURE);
 		}
 
 		token = strtok(input, " \t\n");
@@ -29,7 +28,6 @@ char **tokenize_input(char *input)
 			if (!tokens)
 			{
 				perror("Realloc error");
-.				exit(EXIT_FAILURE);
 			}
 			tokens[token_count] = token;
 			tokens[token_count + 1] = NULL;
