@@ -1,21 +1,20 @@
 #include "shell.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 
 /**
  * main - entry point
- * @ac: arg count
- * @av: arg vector
  *
  * Return: 0 on success, 1 on error
  */
-int main(int ac, char **av)
+int main(void)
 {
 	char *input;
 	char **tokens;
+	char *executable;
 
 	while (1)
 	{
@@ -23,7 +22,7 @@ int main(int ac, char **av)
 		tokens = tokenize_input(input);
 
 		/* Search for the executable */
-		char *executable = find_executable(tokens[0]);
+		executable = find_executable(tokens[0]);
 
 		if (executable != NULL)
 		{
@@ -37,8 +36,10 @@ int main(int ac, char **av)
 			if (child_pid == 0)
 			{
 				/* Child process */
-				execve(executable, tokens, NULL);
-				perror("execve");  // If execve fails
+				if (execve(executable, tokens, NULL) == -1)
+				{
+					perror("execve");
+				}
 				exit(1);
 			}
 			else
