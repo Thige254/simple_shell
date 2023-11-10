@@ -9,8 +9,10 @@
 void handle_env(void)
 {
 	/* Access the external environment variables */
-	for (char **env = environ; *env; env++)
+	char **env = environ;
+	while (*env)
 	{
 		printf("%s\n", *env);
+		env++;
 	}
 }
