@@ -21,6 +21,24 @@ int main(void)
 		input = display_prompt();
 		tokens = tokenize_input(input);
 
+		/* Check for built-in commands */
+		if (tokens != NULL && tokens[0] != NULL)
+		{
+			if (strcmp(tokens[0], "exit") == 0)
+			{
+				free(input);
+				free(tokens);
+				exit(0);
+			}
+			else if (strcmp(tokens[0], "env") == 0)
+			{
+				handle_env();
+				free(input);
+				free(tokens);
+				continue; /* Skip the fork and wait for built-in commands */
+			}
+		}
+
 		/* Search for the executable */
 		executable = find_executable(tokens[0]);
 
