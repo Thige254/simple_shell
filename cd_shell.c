@@ -6,12 +6,12 @@
  * @datash: Data relevant
  * Return: 1 on success
  */
-int change_directory_shell(data_shell *datash)
+int change_directory_shell(shell_data *datash)
 {
 	char *dir;
 	int is_home, is_home2, is_double_dash;
 
-	dir = datash->args[1];
+	dir = datash->arguments[1];
 
 	if (dir != NULL)
 	{

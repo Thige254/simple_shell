@@ -24,35 +24,25 @@ typedef struct shell_data
 /* From exec_line.c */
 int execute_line(shell_data *shell_data);
 
-/* From environment.c (formerly env1.c) */
-int compare_env_name(const char *env_var, const char *name);
-char *get_environment_variable(const char *name, char **environ);
-int print_environment(shell_data *shell_data);
-
-/* From env2.c */
-char *copy_info(char *name, char *value);
-void set_env(char *name, char *value, shell_data *shell_data);
-int set_environment(shell_data *shell_data);
-int unset_environment(shell_data *shell_data);
-
-/* From cmd_exec.c */
-int is_cdir(char *path, int *i);
-char *_which(char *cmd, char **_environ);
-int is_executable(shell_data *shell_data);
-int check_error_cmd(char *dir, shell_data *shell_data);
-int execute_command(shell_data *shell_data);
-
-/* From aux_error.c (renamed to error_messages.c) */
-char *concatenate_cd_error(shell_data *shell_data,
-						   char *msg, char *error, char *line_number);
-char *cd_error_message(shell_data *shell_data);
-char *not_found_error_message(shell_data *shell_data);
-char *exit_shell_error_message(shell_data *shell_data);
+/* ... (other existing function prototypes) */
 
 /* New function prototypes */
 int change_directory_shell(shell_data *datash);
 char *generate_cd_error_message(shell_data *shell_data);
 char *generate_not_found_error_message(shell_data *shell_data);
 char *generate_exit_shell_error_message(shell_data *shell_data);
+
+/* Utility functions */
+char *_str_copy(char *dest, const char *src);
+char *_str_cat(char *dest, const char *src);
+char *convert_to_string(int num);
+int _str_length(const char *str);
+int _str_compare(const char *str1, const char *str2);
+
+/* Directory-related functions */
+void change_directory_to_home(shell_data *datash);
+void change_directory_to_previous(shell_data *datash);
+void change_directory_dot(shell_data *datash);
+void change_directory_to(shell_data *datash);
 
 #endif /* SHELL_H */
