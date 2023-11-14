@@ -1,34 +1,35 @@
 #include "shell.h"
 
 /**
- * custom_memcpy - Copies information between void pointers.
- * @new_ptr: Destination pointer.
- * @ptr: Source pointer.
- * @size: Size of the new pointer.
+ * copy_bytes - copies data between void pointers.
+ * @dest: destination pointer.
+ * @src: source pointer.
+ * @size: size of the destination pointer.
  *
- * Return: No return.
+ * Return: no return.
  */
-void custom_memcpy(void *new_ptr, const void *ptr, unsigned int size)
+void copy_bytes(void *dest, const void *src, unsigned int size)
 {
-	char *char_ptr = (char *)ptr;
-	char *char_new_ptr = (char *)new_ptr;
+	char *char_dest = (char *)dest;
+	const char *char_src = (const char *)src;
 	unsigned int i;
 
 	for (i = 0; i < size; i++)
-		char_new_ptr[i] = char_ptr[i];
+		char_dest[i] = char_src[i];
 }
 
 /**
- * custom_realloc - Reallocates a memory block.
- * @ptr: Pointer to the memory previously allocated.
- * @old_size: Size, in bytes, of the allocated space of ptr.
- * @new_size: New size, in bytes, of the new memory block.
+ * reallocate_memory - reallocates a memory block.
+ * @ptr: pointer to the memory previously allocated.
+ * @old_size: size, in bytes, of the allocated space of ptr.
+ * @new_size: new size, in bytes, of the new memory block.
  *
  * Return: ptr.
  * if new_size == old_size, returns ptr without changes.
  * if malloc fails, returns NULL.
  */
-void *custom_realloc(void *ptr, unsigned int old_size, unsigned int new_size)
+void *reallocate_memory(void *ptr,
+unsigned int old_size, unsigned int new_size)
 {
 	void *new_ptr;
 
@@ -49,26 +50,25 @@ void *custom_realloc(void *ptr, unsigned int old_size, unsigned int new_size)
 		return (NULL);
 
 	if (new_size < old_size)
-		custom_memcpy(new_ptr, ptr, new_size);
+		copy_bytes(new_ptr, ptr, new_size);
 	else
-		custom_memcpy(new_ptr, ptr, old_size);
+		copy_bytes(new_ptr, ptr, old_size);
 
 	free(ptr);
 	return (new_ptr);
 }
 
 /**
- * custom_realloc_double_pointer - Reallocates a
- * memory block of a double pointer.
- * @ptr: Double pointer to the memory previously allocated.
- * @old_size: Size, in bytes, of the allocated space of ptr.
- * @new_size: New size, in bytes, of the new memory block.
+ * reallocate_double_pointer - reallocates a memory block of a double pointer.
+ * @ptr: double pointer to the memory previously allocated.
+ * @old_size: size, in bytes, of the allocated space of ptr.
+ * @new_size: new size, in bytes, of the new memory block.
  *
  * Return: ptr.
  * if new_size == old_size, returns ptr without changes.
  * if malloc fails, returns NULL.
  */
-char **custom_realloc_double_pointer(char **ptr,
+char **reallocate_double_pointer(char **ptr,
 unsigned int old_size, unsigned int new_size)
 {
 	char **new_ptr;

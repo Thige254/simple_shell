@@ -1,43 +1,44 @@
 #include "shell.h"
 
 /**
- * custom_strdup - Duplicates a string in the heap memory.
- * @s: Source string.
- * Return: Duplicated string.
+ * _str_duplicate - Duplicates a string in the heap memory.
+ * @original: Type char pointer, the original string
+ * Return: Duplicated string
  */
-char *custom_strdup(const char *s)
+char *_str_duplicate(const char *original)
 {
 	char *duplicate;
-	size_t len;
+	size_t length;
 
-	len = custom_strlen(s);
-	duplicate = malloc(sizeof(char) * (len + 1));
+	length = _str_length(original);
+	duplicate = malloc(sizeof(char) * (length + 1));
 	if (duplicate == NULL)
 		return (NULL);
-	custom_memcpy(duplicate, s, len + 1);
+	_memcpy(duplicate, original, length + 1);
 	return (duplicate);
 }
 
 /**
- * custom_strlen - Returns the length of a string.
- * @s: Source string.
- * Return: Length of the string.
+ * _str_length - Returns the length of a string.
+ * @s: Type char pointer
+ * Return: Length of the string
  */
-int custom_strlen(const char *s)
+int _str_length(const char *s)
 {
-	int len;
+	int length;
 
-	for (len = 0; s[len] != 0; len++)
+	for (length = 0; s[length] != 0; length++)
 	{
 	}
-	return (len);
+	return (length);
 }
 
 /**
- * compare_chars - Compare characters of strings.
+ * compare_chars - Compare characters of strings
  * @str: Input string.
  * @delim: Delimiter.
- * Return: 1 if the characters are equal, 0 if not.
+ *
+ * Return: 1 if characters are equal, 0 if not.
  */
 int compare_chars(char str[], const char *delim)
 {
@@ -60,60 +61,62 @@ int compare_chars(char str[], const char *delim)
 }
 
 /**
- * custom_strtok - Splits a string by some delimiter.
+ * _string_tokenize - Splits a string by some delimiter.
  * @str: Input string.
  * @delim: Delimiter.
- * Return: String split.
+ *
+ * Return: Pointer to the tokenized string.
  */
-char *custom_strtok(char str[], const char *delim)
+char *_string_tokenize(char str[], const char *delim)
 {
-	static char *splitted, *str_end;
-	char *str_start;
+	static char *tokenized, *string_end;
+	char *string_start;
 	unsigned int i, bool;
 
 	if (str != NULL)
 	{
 		if (compare_chars(str, delim))
 			return (NULL);
-		splitted = str; /* Store the first address */
-		i = custom_strlen(str);
-		str_end = &str[i]; /* Store the last address */
+		tokenized = str; /* Store the first address */
+		i = _str_length(str);
+		string_end = &str[i]; /* Store the last address */
 	}
-	str_start = splitted;
-	if (str_start == str_end) /* Reaching the end */
+	string_start = tokenized;
+	if (string_start == string_end) /* Reaching the end */
 		return (NULL);
 
-	for (bool = 0; *splitted; splitted++)
+	for (bool = 0; *tokenized; tokenized++)
 	{
-		/* Breaking the loop finding the next token */
-		if (splitted != str_start)
-			if (*splitted && *(splitted - 1) == '\0')
+		/* Breaking loop finding the next token */
+		if (tokenized != string_start)
+			if (*tokenized && *(tokenized - 1) == '\0')
 				break;
-		/* Replacing delimiter with null char */
+		/* Replacing delimiter for null char */
 		for (i = 0; delim[i]; i++)
 		{
-			if (*splitted == delim[i])
+			if (*tokenized == delim[i])
 			{
-				*splitted = '\0';
-				if (splitted == str_start)
-					str_start++;
+				*tokenized = '\0';
+				if (tokenized == string_start)
+					string_start++;
 				break;
 			}
 		}
-		if (bool == 0 && *splitted) /* Str != Delim */
+		if (bool == 0 && *tokenized) /* Str != Delim */
 			bool = 1;
 	}
 	if (bool == 0) /* Str == Delim */
 		return (NULL);
-	return (str_start);
+	return (string_start);
 }
 
 /**
- * custom_isdigit - Defines if the string passed is a number.
- * @s: Input string.
+ * _is_digit - Defines if the string passed is a number.
+ *
+ * @s: Input string
  * Return: 1 if the string is a number, 0 otherwise.
  */
-int custom_isdigit(const char *s)
+int _is_digit(const char *s)
 {
 	unsigned int i;
 

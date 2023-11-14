@@ -1,109 +1,116 @@
+/* File: string_operations.c */
 #include "shell.h"
 
 /**
- * custom_strcat - Concatenate two strings.
- * @dest: Destination string.
- * @src: Source string.
- * Return: Pointer to the destination string.
+ * _str_concat - Concatenate two strings
+ * @destination: Pointer to the destination string
+ * @source: Pointer to the source string
+ * Return: Pointer to the destination string
  */
-char *custom_strcat(char *dest, const char *src)
+char *_str_concat(char *destination, const char *source)
 {
-	int dest_index, src_index;
+	int dest_len, src_index;
 
-	for (dest_index = 0; dest[dest_index] != '\0'; dest_index++)
+	for (dest_len = 0; destination[dest_len] != '\0'; dest_len++)
 		;
 
-	for (src_index = 0; src[src_index] != '\0'; src_index++)
+	for (src_index = 0; source[src_index] != '\0'; src_index++)
 	{
-		dest[dest_index] = src[src_index];
-		dest_index++;
+		destination[dest_len] = source[src_index];
+		dest_len++;
 	}
 
-	dest[dest_index] = '\0';
-	return (dest);
+	destination[dest_len] = '\0';
+	return (destination);
 }
 
 /**
- * custom_strcpy - Copy the string pointed to by src.
- * @dest: Destination string.
- * @src: Source string.
- * Return: Pointer to the destination string.
+ * _str_copy - Copy a string
+ * @destination: Pointer to the destination string
+ * @source: Pointer to the source string
+ * Return: Pointer to the destination string
  */
-char *custom_strcpy(char *dest, char *src)
+char *_str_copy(char *destination, char *source)
 {
 	size_t index;
 
-	for (index = 0; src[index] != '\0'; index++)
+	for (index = 0; source[index] != '\0'; index++)
 	{
-		dest[index] = src[index];
+		destination[index] = source[index];
 	}
-	dest[index] = '\0';
+	destination[index] = '\0';
 
-	return (dest);
+	return (destination);
 }
 
 /**
- * custom_strcmp - Compare two strings.
- * @s1: String to be compared.
- * @s2: String to be compared.
- * Return: 0 if the strings are equal, a negative value if s1 < s2,
- * a positive value if s1 > s2.
+ * _str_compare - Compare two strings
+ * @str1: First string to be compared
+ * @str2: Second string to be compared
+ * Return: 0 if equal, 1 if str1 is greater, -1 if str2 is greater
  */
-int custom_strcmp(char *s1, char *s2)
+int _str_compare(char *str1, char *str2)
 {
 	int index;
 
-	for (index = 0; s1[index] == s2[index] && s1[index]; index++)
+	for (index = 0; str1[index] == str2[index] && str1[index]; index++)
 		;
 
-	if (s1[index] > s2[index])
+	if (str1[index] > str2[index])
 		return (1);
-	if (s1[index] < s2[index])
+	if (str1[index] < str2[index])
 		return (-1);
 	return (0);
 }
 
 /**
- * custom_strchr - Locate a character in a string.
- * @s: String.
- * @c: Character.
- * Return: Pointer to the first occurrence of the character c.
+ * _str_find_char - Locate a character in a string
+ * @str: String to be searched
+ * @character: Character to be located
+ * Return: Pointer to the first occurrence of the
+ * character, or '\0' if not found
  */
-char *custom_strchr(char *s, char c)
+char *_str_find_char(char *str, char character)
 {
 	unsigned int index = 0;
 
-	for (; *(s + index) != '\0'; index++)
-		if (*(s + index) == c)
-			return (s + index);
-	if (*(s + index) == c)
-		return (s + index);
-	return (NULL);
+	for (; *(str + index) != '\0'; index++)
+		if (*(str + index) == character)
+			return (str + index);
+
+	if (*(str + index) == character)
+		return (str + index);
+
+	return ('\0');
 }
 
 /**
- * custom_strspn - Get the length of a prefix substring.
- * @s: Initial segment.
- * @accept: Accepted bytes.
- * Return: The number of accepted bytes.
+ * _str_span - Get the length of a prefix substring
+ * @str: Initial segment
+ * @accepted_chars: Accepted characters
+ * Return: Number of accepted characters
  */
-int custom_strspn(char *s, char *accept)
+int _str_span(char *str, char *accepted_chars)
 {
-	int s_index, accept_index, is_accepted;
+	int str_index, accepted_index, is_accepted;
 
-	for (s_index = 0; *(s + s_index) != '\0'; s_index++)
+	for (str_index = 0; *(str + str_index) != '\0'; str_index++)
 	{
 		is_accepted = 1;
-		for (accept_index = 0; *(accept + accept_index) != '\0'; accept_index++)
+
+		for (accepted_index = 0; *(accepted_chars
+		+ accepted_index) != '\0'; accepted_index++)
 		{
-			if (*(s + s_index) == *(accept + accept_index))
+			if (*(str + str_index) == *(accepted_chars + accepted_index))
 			{
 				is_accepted = 0;
 				break;
 			}
 		}
+
 		if (is_accepted == 1)
 			break;
 	}
-	return (s_index);
+
+	return (str_index);
 }
